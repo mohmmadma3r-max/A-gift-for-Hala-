@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>صفحة خاصة</title>
+    <style>
+        :root {
+            --pink: #ff85a2;
+            --blue: #4a90e2;
+            --bg-default: #fff5f7;
+            --bg-m-mode: #e3f2fd;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-default);
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow: hidden;
+            text-align: center;
+            transition: background-color 0.8s ease;
+        }
+
+        /* زينة الزهور */
+        .flower {
+            position: fixed;
+            font-size: clamp(30px, 8vw, 55px);
+            z-index: 10;
+            animation: bloom 2s ease-out forwards;
+        }
+        @keyframes bloom {
+            0% { transform: scale(0) rotate(0); opacity: 0; }
+            100% { transform: scale(1) rotate(360deg); opacity: 1; }
+        }
+
+        .container {
+            background: white;
+            padding: clamp(20px, 5vw, 40px) 20px;
+            border-radius: 30px;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.05);
+            z-index: 5;
+            width: 90%;
+            max-width: 420px;
+            border: 2px solid #f0f0f0;
+            margin: 20px;
+        }
+
+        .main-btns {
+            display: flex;
+            gap: clamp(15px, 4vw, 25px);
+            justify-content: center;
+            margin-top: 30px;
+        }
+
+        .btn {
+            width: clamp(70px, 20vw, 90px);
+            height: clamp(70px, 20vw, 90px);
+            border-radius: 50%;
+            border: none;
+            font-size: clamp(30px, 8vw, 40px);
+            font-weight: bold;
+            color: white;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .btn-h { background-color: var(--pink); box-shadow: 0 8px 20px rgba(255,133,162,0.4); }
+        .btn-m { background-color: var(--blue); box-shadow: 0 8px 20px rgba(74,144,226,0.4); }
+
+        .overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(255,255,255,0.98);
+            z-index: 100;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        #timer { font-size: clamp(60px, 20vw, 100px); color: var(--pink); font-weight: 900; }
+
+        .loader-bar {
+            width: 85%;
+            max-width: 300px;
+            height: 25px;
+            background: #f0f0f0;
+            border-radius: 20px;
+            position: relative;
+            margin: 25px auto 0;
+            overflow: hidden;
+        }
+
+        .loader-fill {
+            height: 100%;
+            width: 0%;
+            background: repeating-linear-gradient(45deg, var(--pink), var(--pink) 15px, #ffb3c1 15px, #ffb3c1 30px);
+            transition: width 0.1s linear;
+        }
+
+        .loader-fill-blue {
+            background: repeating-linear-gradient(45deg, var(--blue), var(--blue) 15px, #a3c9f1 15px, #a3c9f1 30px) !important;
+        }
+
+        .options-menu { display: none; flex-direction: column; gap: 15px; width: 100%; }
+
+        .option-btn {
+            padding: 15px;
+            border: 2px solid var(--pink);
+            background: white;
+            color: var(--pink);
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: clamp(16px, 4vw, 20px);
+            cursor: pointer;
+        }
+
+        /* --- نظام تمزيق الرسالة --- */
+        .message-wrapper {
+            position: relative;
+            width: 90%;
+            max-width: 450px;
+            display: none;
+            perspective: 1000px;
+        }
+
+        .message-box {
+            background: #fff;
+            padding: 30px;
+            border-radius: 25px;
+            border: 4px dashed var(--pink);
+            line-height: 1.7;
+            font-size: 18px;
+            white-space: pre-line;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* كلاس التمزيق */
+        .tear-animation {
+            animation: rip-container 1.2s forwards ease-in;
+        }
+
+        .tear-part {
+            position: absolute;
+            top: 0;
+            width: 50%;
+            height: 100%;
+            background: white;
+            overflow: hidden;
+            border: 4px dashed var(--pink);
+            padding: 30px;
+            box-sizing: border-box;
+            transition: all 0.8s ease;
+        }
+
+        .part-left {
+            left: 0;
+            border-right: none;
+            clip-path: polygon(0% 0%, 100% 0%, 95% 20%, 100% 40%, 95% 60%, 100% 80%, 95% 100%, 0% 100%);
+        }
+
+        .part-right {
+            right: 0;
+            border-left: none;
+            clip-path: polygon(5% 0%, 100% 0%, 100% 100%, 5% 100%, 0% 80%, 5% 60%, 0% 40%, 5% 20%);
+        }
+
+        @keyframes rip-left {
+            to { transform: translateX(-150%) rotate(-15deg); opacity: 0; }
+        }
+        @keyframes rip-right {
+            to { transform: translateX(150%) rotate(15deg); opacity: 0; }
+        }
+
+        .back-btn {
+            margin-top: 30px;
+            padding: 12px 40px;
+            background: var(--pink);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            font-weight: bold;
+            cursor: pointer;
+            z-index: 200;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="flower" style="top:10px; right:10px;">🌸</div>
+    <div class="flower" style="top:10px; left:10px;">🌸</div>
+    <div class="flower" style="bottom:10px; right:10px;">🌸</div>
+    <div class="flower" style="bottom:10px; left:10px;">🌸</div>
+
+    <div class="container" id="mainUI">
+        <p id="welcomeText" style="color: #888; font-size: 1.2rem; font-weight: bold;">اختر الحرف الخاص بك ✨</p>
+        
+        <div class="main-btns">
+            <button class="btn btn-h" onclick="startFlow('H')">H</button>
+            <button class="btn btn-m" onclick="startFlow('M')">M</button>
+        </div>
+
+        <div id="hOptions" class="options-menu" style="margin-top:30px;">
+            <button class="option-btn" onclick="processSelection('sad_h', 'pink')">زعلانه 🥺</button>
+            <button class="option-btn" onclick="processSelection('happy_h', 'pink')">مبسوطه 🥹</button>
+            <button class="option-btn" onclick="processDuaSelection()">بدك دعوة 🥺🥹</button>
+            <button class="option-btn" onclick="processSelection('scared_h', 'pink')">خايفه 🥺</button>
+        </div>
+
+        <div id="mOptions" class="options-menu" style="margin-top:30px;">
+            <button class="option-btn" style="border-color:var(--blue); color:var(--blue);" onclick="processSelection('happy_m', 'blue')">مبسوط 😊</button>
+            <button class="option-btn" style="border-color:var(--blue); color:var(--blue);" onclick="processSelection('sad_m', 'blue')">زعلان شوي أو متضايق 🥺</button>
+        </div>
+    </div>
+
+    <div id="overlay" class="overlay">
+        <div id="timer"></div>
+        <div id="loaderGroup" style="display:none; text-align: center; width: 100%;">
+            <p id="loaderNote" style="font-weight: bold; font-size: 18px; margin-bottom: 15px;"></p>
+            <div class="loader-bar">
+                <div id="loaderFill" class="loader-fill"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="messageArea" class="overlay">
+        <div id="envelopeContainer" onclick="openEnvelope()" style="cursor: pointer; text-align: center;">
+            <div id="envIcon" style="font-size: 100px;">✉️</div>
+            <p id="envHint" style="font-weight: bold; font-size: 18px; margin-top: 10px;">انقر لرؤية الرسالة 👆</p>
+        </div>
+
+        <div class="message-wrapper" id="msgWrapper">
+            <div class="message-box" id="msgText"></div>
+        </div>
+
+        <button class="back-btn" id="backBtn" style="display:none;" onclick="tearAndClose()">تمزيق وإغلاق ✨</button>
+    </div>
+
+    <script>
+        const messages = {
+            sad_h: `اذا كنت انا سبب زعلك ف انا اسف كثير 🥺 \n\nواذا سبب زعلك الدراسة معلش حلولتي تحملي ضل اخر فصل وان شاء الله بتنجحي بالمعدل العالي يااارببب 🥺🥺🥺\n\nواذا حدا مزعلك اعرفي انه بغار منك وما تخليه ينكد عليكي يومك خلي يومك حلو زي عيونك\n\nيا رب يا مفرج الهموم ارح قلبها وابعد عنها كل ضيق ونكد، اللهم اجعل في قلبها نوراً وفي خاطرها راحة لا تنتهي، وطمن بالها ويسر أمرها وافتح لها أبواب السعادة في كل طريق تمشي فيه يا رب العالمين 🌸`,
+            happy_h: `ان شاءالله الفرحه تضل على وجهك الحلو يا ام عيون حلوين 🥹 ويبعد عنك النكد والزعل ياارب 🥺🥺🥺\n\nاللهم اتمم عليها فرحتها واجعل الابتسامة لا تفارق محياها، وبارك لها في أيامها القادمة واجعلها مليئة بالبشائر والمسرات التي تدمع عينها فرحاً بها، واحفظ لها هذا القلب النقي من كل سوء يا كريم 🥹💗`,
+            scared_h: `ليش خايفه 🥺\n\nصح انا الك وانا ما بدي غيرك صح ليش خايفه خايفه من المستقبل حلوشتي ما تخافي انا شايفنا مع بعض فيه خايفه انه اتركك ولك انا ما بتحمل ساعه بدونك خايفه يفصبوني على غيرك ولك انا اذا بدي اشي بأخذه مو على كيف حدا\n\nاللهم امن روعتها وطمئن قلبها وانزع منه كل خوف وقلق، يا رب اجعل مستقبلنا مع بعض، واحمِنا من كل حاسد ومن كل سوء، واكتب لنا الخير دائماً ولا ترينا في بعض مكروهاً ابداً يا رب 🥺✨`,
+            happy_m: `يا رب يا كريم اجعل ايامه كلها فرح وسعادة، واملاه قلبه بالابتسامات والراحة يارب العالمين...`,
+            sad_m: `يا رب \n\nاليوم يمكن يكون زعلان شوي، ومغيم على قلبه....`
+        };
+
+        const longDuas = [
+            "يا رب يا حنان يا منان، افتح لها أبواب التوفيق من حيث لا تحتسب، ويسّر لها كل عسير في دراستها... 🌸",
+            "اللهم إني استودعتك قلبها وعقلها وتفكيرها، فاحمها بحماك واحفظها بعينك التي لا تنام... 🥺",
+            "يا رب ارزقها راحة البال وطمأنينة القلب، واجعل هذه السنة الدراسية تمر بسلام وخفة... 🥹💗"
+        ];
+
+        let selectedText = "";
+        let currentModeColor = "pink";
+
+        function startFlow(type) {
+            currentModeColor = (type === 'M') ? "blue" : "pink";
+            document.body.style.backgroundColor = (type === 'M') ? "var(--bg-m-mode)" : "var(--bg-default)";
+
+            const overlay = document.getElementById('overlay');
+            const timer = document.getElementById('timer');
+            overlay.style.display = 'flex';
+            let count = 5;
+            timer.innerText = count;
+            timer.style.color = `var(--${currentModeColor})`;
+
+            let counterInterval = setInterval(() => {
+                count--;
+                timer.innerText = count;
+                if(count <= 0) {
+                    clearInterval(counterInterval);
+                    overlay.style.display = 'none';
+                    document.getElementById('welcomeText').innerText = (type === 'M') ? "شو حاسس هسا؟ 💙" : "بشو حاسة هسا؟ ❤️";
+                    document.querySelector('.main-btns').style.display = 'none';
+                    document.getElementById(type === 'H' ? 'hOptions' : 'mOptions').style.display = 'flex';
+                }
+            }, 1000);
+        }
+
+        function processSelection(key, color) {
+            selectedText = messages[key];
+            showLoadingBar("", color);
+        }
+
+        function processDuaSelection() {
+            selectedText = longDuas[Math.floor(Math.random() * longDuas.length)];
+            showLoadingBar("كل مره تدخلي فيه دعوة مختلفة ✨", "pink");
+        }
+
+        function showLoadingBar(note, color) {
+            const overlay = document.getElementById('overlay');
+            const loaderFill = document.getElementById('loaderFill');
+            const loaderNote = document.getElementById('loaderNote');
+            
+            document.getElementById('timer').style.display = 'none';
+            loaderNote.innerText = note;
+            loaderNote.style.color = `var(--${color})`;
+            
+            if(color === 'blue') loaderFill.classList.add('loader-fill-blue');
+            else loaderFill.classList.remove('loader-fill-blue');
+
+            overlay.style.display = 'flex';
+            document.getElementById('loaderGroup').style.display = 'block';
+            
+            let width = 0;
+            let barInterval = setInterval(() => {
+                if (width >= 100) {
+                    clearInterval(barInterval);
+                    setTimeout(() => { 
+                        overlay.style.display = 'none'; 
+                        showEnvelopeUI(color); 
+                    }, 500);
+                } else {
+                    width++;
+                    loaderFill.style.width = width + '%';
+                }
+            }, 30);
+        }
+
+        function showEnvelopeUI(color) {
+            document.getElementById('messageArea').style.display = 'flex';
+            document.getElementById('envelopeContainer').style.display = 'flex';
+            document.getElementById('msgWrapper').style.display = 'none';
+            document.getElementById('backBtn').style.display = 'none';
+            
+            document.getElementById('envHint').style.color = `var(--${color})`;
+            document.getElementById('msgText').style.borderColor = `var(--${color})`;
+            document.getElementById('backBtn').style.backgroundColor = `var(--${color})`;
+        }
+
+        function openEnvelope() {
+            document.getElementById('envIcon').innerText = '📩';
+            setTimeout(() => {
+                document.getElementById('envelopeContainer').style.display = 'none';
+                const msgWrapper = document.getElementById('msgWrapper');
+                const msgBox = document.getElementById('msgText');
+                msgBox.innerText = selectedText;
+                msgWrapper.style.display = 'block';
+                document.getElementById('backBtn').style.display = 'inline-block';
+            }, 800);
+        }
+
+        function tearAndClose() {
+            const wrapper = document.getElementById('msgWrapper');
+            const msgBox = document.getElementById('msgText');
+            const btn = document.getElementById('backBtn');
+
+            // إخفاء الزر فوراً
+            btn.style.opacity = '0';
+
+            // إنشاء أنصاف الورقة الممزقة
+            const leftPart = document.createElement('div');
+            leftPart.className = 'tear-part part-left';
+            leftPart.style.borderColor = msgBox.style.borderColor;
+            leftPart.innerText = selectedText;
+
+            const rightPart = document.createElement('div');
+            rightPart.className = 'tear-part part-right';
+            rightPart.style.borderColor = msgBox.style.borderColor;
+            rightPart.innerText = selectedText;
+
+            // إخفاء المحتوى الأصلي وإظهار الأجزاء
+            msgBox.style.visibility = 'hidden';
+            wrapper.appendChild(leftPart);
+            wrapper.appendChild(rightPart);
+
+            // تشغيل حركة التمزيق
+            setTimeout(() => {
+                leftPart.style.animation = 'rip-left 1s forwards';
+                rightPart.style.animation = 'rip-right 1s forwards';
+            }, 100);
+
+            // إغلاق الواجهة بالكامل بعد الحركة
+            setTimeout(() => {
+                document.getElementById('messageArea').style.display = 'none';
+                // إعادة تصفير العناصر للاستخدام القادم
+                msgBox.style.visibility = 'visible';
+                leftPart.remove();
+                rightPart.remove();
+                btn.style.opacity = '1';
+                // تصفير شريط التحميل
+                document.getElementById('loaderFill').style.width = '0%';
+                document.getElementById('loaderGroup').style.display = 'none';
+                document.getElementById('timer').style.display = 'block';
+            }, 1100);
+        }
+    </script>
+</body>
+</html>
